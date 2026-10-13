@@ -4,14 +4,16 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
-# Restore first (cached while project files don't change)
+# Restore first (caches NuGet packages while project files don't change)
 COPY SecretSanta.ServiceDefaults/SecretSanta.ServiceDefaults.csproj SecretSanta.ServiceDefaults/
 COPY SecretSanta.ApiService/SecretSanta.ApiService.csproj SecretSanta.ApiService/
 RUN dotnet restore SecretSanta.ApiService/SecretSanta.ApiService.csproj
 
 COPY SecretSanta.ServiceDefaults/ SecretSanta.ServiceDefaults/
 COPY SecretSanta.ApiService/ SecretSanta.ApiService/
-RUN dotnet publish SecretSanta.ApiService/SecretSanta.ApiService.csproj -c Release -o /app/publish --no-restore /p:UseAppHost=false
+# No --no-restore: with all sources present the SDK adds implicit packages
+# (e.g. the .NET 10 Blazor framework scripts _framework/blazor.server.js) that the csproj-only restore misses
+RUN dotnet publish SecretSanta.ApiService/SecretSanta.ApiService.csproj -c Release -o /app/publish /p:UseAppHost=false
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
