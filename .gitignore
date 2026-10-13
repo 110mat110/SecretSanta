@@ -55,3 +55,9 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+/.vs
+/SecretSanta.ApiService/appsettings.Development.json
+/SecretSanta.AppHost/appsettings.Development.json
+/SecretSanta.Web/appsettings.Development.json
+/SecretSanta.Web/SecretSanta.Web.csproj.user
+/SecretSanta.ApiService/SecretSanta.ApiService.csproj.user

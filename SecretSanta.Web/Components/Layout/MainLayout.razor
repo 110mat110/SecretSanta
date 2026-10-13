@@ -1,0 +1,26 @@
+﻿@inherits LayoutComponentBase
+
+<PageTitle>Secret Santa</PageTitle>
+<div class="page">
+    <div class="main">
+        <header class="app-bar-container">
+            <div class="app-bar">
+                <div class="app-bar-left">
+                    <a href="/" class="logo-link">
+                        <img src="Logo.png" alt="SecretSanta Logo" class="app-logo" />
+                        <span class="brand-name">Secret <span>Santa</span></span>
+                    </a>
+                </div>
+                <div class="app-bar-right">
+                    <ActionButtons />
+                </div>
+            </div>
+        </header>
+        <main class="page-container">
+            @Body
+        </main>
+        <footer class="app-footer">
+            @L["Footer"]
+        </footer>
+    </div>
+</div>

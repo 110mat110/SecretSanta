@@ -1,0 +1,43 @@
+@using System.Globalization
+@implements IDisposable
+@inject NavigationManager Navigation
+
+@* Language switcher – full page reload via /Culture/Set so the Blazor circuit picks up the new culture *@
+
+<nav class="lang-switcher" aria-label="@L["Language"]">
+    @foreach (var (culture, label) in Languages)
+    {
+        var isActive = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == culture;
+        <a href="@BuildHref(culture)"
+           target="_top"
+           class="lang-option @(isActive ? "active" : null)"
+           aria-current="@(isActive ? "true" : null)"
+           lang="@culture">@label</a>
+    }
+</nav>
+
+@code {
+    private static readonly (string Culture, string Label)[] Languages =
+    [
+        ("sk", "SK"),
+        ("cs", "CZ"),
+        ("en", "EN")
+    ];
+
+    protected override void OnInitialized()
+    {
+        // Keep redirectUri in sync with the current page
+        Navigation.LocationChanged += OnLocationChanged;
+    }
+
+    private string BuildHref(string culture)
+    {
+        var redirectUri = "/" + Navigation.ToBaseRelativePath(Navigation.Uri);
+        return $"Culture/Set?culture={culture}&redirectUri={Uri.EscapeDataString(redirectUri)}";
+    }
+
+    private void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+        => InvokeAsync(StateHasChanged);
+
+    public void Dispose() => Navigation.LocationChanged -= OnLocationChanged;
+}

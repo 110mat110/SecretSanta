@@ -1,0 +1,202 @@
+﻿@page "/"
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Text.Json
+@using SecretSanta.ServiceDefaults.Models
+@inject ILogger<Index> Logger
+@inject NavigationManager navigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IHttpClientFactory HttpClientFactory
+@using Microsoft.JSInterop
+
+
+<PageTitle>Secret Santa · @L["PageHome"]</PageTitle>
+
+@if (IsAuthenticated)
+{
+    <section class="page-hero">
+        <div class="page-header">
+            <div>
+                <span class="eyebrow">🎄 @L["ChristmasYear", DateTime.Now.Year]</span>
+                <h3>@L["YourGroups"]</h3>
+                <p class="lead-text">@L["GroupsIntro"]</p>
+            </div>
+            <button class="btn btn-primary" @onclick="CreateNewGroup">＋ @L["AddGroup"]</button>
+        </div>
+    </section>
+
+    @if (Groups == null)
+    {
+        <div class="loading">@L["LoadingGroups"]</div>
+    }
+    else if (!Groups.Any())
+    {
+        <div class="empty-state">
+            <span class="empty-icon">🎁</span>
+            <h5>@L["NoGroupsTitle"]</h5>
+            <p>@L["NoGroupsText"]</p>
+        </div>
+    }
+    else
+    {
+        <ul class="group-list">
+            @foreach (var group in Groups)
+            {
+                <li class="group-card" @onclick="@(() => NavigateToGroup(group.Id))">
+                    <div class="group-top">
+                        <span class="group-icon">🎄</span>
+                        <span class="badge-date">📅 @group.Deadline.ToString("d")</span>
+                    </div>
+                    <p class="group-name">@group.Name</p>
+                    @if (!string.IsNullOrWhiteSpace(group.Description))
+                    {
+                        <p class="group-desc">@group.Description</p>
+                    }
+                    <div class="group-footer">
+                        <button class="btn btn-sm @(CopiedGroupId == group.Id ? "btn-outline-secondary btn-copied" : "btn-outline-secondary")"
+                                @onclick:stopPropagation="true" @onclick="@(() => CopyLinkToClipboard(group.Id))">
+                            @(CopiedGroupId == group.Id ? $"✓ {L["Copied"]}" : $"🔗 {L["CopyLink"]}")
+                        </button>
+                        <span class="group-open" aria-hidden="true">→</span>
+                    </div>
+                </li>
+            }
+        </ul>
+    }
+
+}
+else
+{
+    <section class="page-hero page-hero-lg">
+        <div class="hero">
+            <div>
+                <span class="eyebrow">❄ @L["HeroEyebrow"]</span>
+                <h1 class="hero-title">@((MarkupString)L["HeroTitle"].Value)</h1>
+                <p class="lead-text">@L["HeroText"]</p>
+                <a href="/Identity/Login" target="_top" class="custom-button custom-button-gold custom-button-lg">
+                    @L["Login"]
+                </a>
+            </div>
+            <div class="hero-art">
+                <img src="Logo.png" alt="Secret Santa" />
+                <span class="float f1">⭐</span>
+                <span class="float f2">🎁</span>
+                <span class="float f3">❄️</span>
+            </div>
+        </div>
+    </section>
+
+    <ol class="steps">
+        <li>
+            <span class="step-num">1</span>
+            <strong>@L["Step1Title"]</strong>
+            <p>@L["Step1Text"]</p>
+        </li>
+        <li>
+            <span class="step-num">2</span>
+            <strong>@L["Step2Title"]</strong>
+            <p>@L["Step2Text"]</p>
+        </li>
+        <li>
+            <span class="step-num">3</span>
+            <strong>@L["Step3Title"]</strong>
+            <p>@L["Step3Text"]</p>
+        </li>
+    </ol>
+}
+
+@code {
+    private ClaimsPrincipal User;
+    private List<ApiGroup> Groups;
+    private bool IsAuthenticated = false;
+    private Guid? CopiedGroupId;
+    [Inject] private IJSRuntime JS { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        try
+        {
+            User = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+            IsAuthenticated = User?.Identity?.IsAuthenticated ?? false;
+            if (IsAuthenticated)
+            {
+                var userModel = new ApiUser()
+                    {
+                        Name = User.Identity.Name, // usually "name" claim
+                        Email = User.FindFirst(ClaimTypes.Email)?.Value,
+                        GoogleId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                    };
+
+                var client = HttpClientFactory.CreateClient("apiservice");
+
+                var res = await client.PostAsJsonAsync("api/user", userModel);
+
+                var response = await client.GetAsync($"api/group/all/{userModel.GoogleId}");
+                if (response.IsSuccessStatusCode)
+                {
+                    var json = await response.Content.ReadAsStringAsync();
+                    Groups = JsonSerializer.Deserialize<List<ApiGroup>>(json, new JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true
+                        }) ?? [];
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e, "Failed to resolve the authenticated user");
+        }
+    }
+
+    private void NavigateToGroup(Guid groupId)
+    {
+        navigationManager.NavigateTo($"/{groupId}");
+    }
+
+        private async Task CreateNewGroup()
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            Console.WriteLine("User not logged in");
+            return;
+        }
+
+        // Call API to create new group
+        var response = await HttpClientFactory.CreateClient("apiservice").PostAsJsonAsync($"api/group/{userId}", new { });
+        if (response.IsSuccessStatusCode)
+        {
+            var newGroup = await response.Content.ReadFromJsonAsync<ApiGroup>();
+
+            if (newGroup != null)
+            {
+                // Add only if group is active
+                if (newGroup.IsActive)
+                    Groups.Add(newGroup);
+
+                StateHasChanged(); // Rerender list
+            }
+        }
+        else
+        {
+            Console.WriteLine($"Failed to create group: {response.StatusCode}");
+        }
+    }
+
+    private async Task CopyLinkToClipboard(Guid groupId)
+    {
+        var link = navigationManager.ToAbsoluteUri($"/{groupId}").ToString();
+        await JS.InvokeVoidAsync("navigator.clipboard.writeText", link);
+        Console.WriteLine($"Copied link: {link}");
+
+        CopiedGroupId = groupId;
+        StateHasChanged();
+        await Task.Delay(2000);
+        if (CopiedGroupId == groupId)
+        {
+            CopiedGroupId = null;
+        }
+    }
+}

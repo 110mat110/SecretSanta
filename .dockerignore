@@ -1,0 +1,13 @@
+**/bin/
+**/obj/
+**/.vs/
+**/.vscode/
+**/*.user
+**/node_modules/
+.git/
+.github/
+
+# Local secrets – production config comes from environment variables
+**/appsettings.Development.json
+**/secrets.json
+**/.env

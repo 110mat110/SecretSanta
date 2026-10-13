@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="PageHome" xml:space="preserve">
+    <value>Domů</value>
+  </data>
+  <data name="NotFound" xml:space="preserve">
+    <value>Je nám líto, na této adrese nic není.</value>
+  </data>
+  <data name="Footer" xml:space="preserve">
+    <value>🎄 Veselé Vánoce a šťastné obdarovávání</value>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>Jazyk</value>
+  </data>
+  <data name="Login" xml:space="preserve">
+    <value>Přihlásit se přes Google</value>
+  </data>
+  <data name="Logout" xml:space="preserve">
+    <value>Odhlásit se</value>
+  </data>
+  <data name="ChristmasYear" xml:space="preserve">
+    <value>Vánoce {0}</value>
+  </data>
+  <data name="YourGroups" xml:space="preserve">
+    <value>Tvoje skupiny</value>
+  </data>
+  <data name="GroupsIntro" xml:space="preserve">
+    <value>Vytvoř si vánoční skupinu, pomocí odkazu do ní pozvi kamarády a namíchejte si dárky podle svých přání.</value>
+  </data>
+  <data name="AddGroup" xml:space="preserve">
+    <value>Přidat vánoční skupinu</value>
+  </data>
+  <data name="LoadingGroups" xml:space="preserve">
+    <value>Načítám skupiny...</value>
+  </data>
+  <data name="NoGroupsTitle" xml:space="preserve">
+    <value>Zatím tu nic není</value>
+  </data>
+  <data name="NoGroupsText" xml:space="preserve">
+    <value>Nemáš aktivní skupiny. Přidej novou tlačítkem nahoře a pozvi kamarády.</value>
+  </data>
+  <data name="CopyLink" xml:space="preserve">
+    <value>Kopírovat odkaz</value>
+  </data>
+  <data name="Copied" xml:space="preserve">
+    <value>Zkopírováno</value>
+  </data>
+  <data name="HeroEyebrow" xml:space="preserve">
+    <value>Vánoční losování dárků</value>
+  </data>
+  <data name="HeroTitle" xml:space="preserve">
+    <value>Dárky s &lt;em&gt;překvapením&lt;/em&gt; pro celou partu.</value>
+  </data>
+  <data name="HeroText" xml:space="preserve">
+    <value>Založ skupinu, pošli kamarádům odkaz a nech Santu rozhodnout, kdo komu co koupí. Bez papírků v klobouku.</value>
+  </data>
+  <data name="Step1Title" xml:space="preserve">
+    <value>Vytvoř skupinu</value>
+  </data>
+  <data name="Step1Text" xml:space="preserve">
+    <value>Nastav název, uzávěrku a počet přání na osobu.</value>
+  </data>
+  <data name="Step2Title" xml:space="preserve">
+    <value>Pozvi kamarády</value>
+  </data>
+  <data name="Step2Text" xml:space="preserve">
+    <value>Pošli jim odkaz a každý si napíše svá přání.</value>
+  </data>
+  <data name="Step3Title" xml:space="preserve">
+    <value>Santa rozdělí</value>
+  </data>
+  <data name="Step3Text" xml:space="preserve">
+    <value>Po uzávěrce každý uvidí, jaké dárky má koupit.</value>
+  </data>
+  <data name="LoginToSeeGroup" xml:space="preserve">
+    <value>Přihlaste se prosím, abyste mohli vidět detaily skupiny.</value>
+  </data>
+  <data name="GroupNotFound" xml:space="preserve">
+    <value>Jejda! Tato skupina není dostupná nebo neexistuje.</value>
+  </data>
+  <data name="GroupClosed" xml:space="preserve">
+    <value>Skupina uzavřena</value>
+  </data>
+  <data name="SantaDecided" xml:space="preserve">
+    <value>Santa už rozhodl, kdo komu daruje dárky!</value>
+  </data>
+  <data name="GiftsToBuy" xml:space="preserve">
+    <value>Dárky, které máš koupit</value>
+  </data>
+  <data name="GroupDetails" xml:space="preserve">
+    <value>Detaily skupiny</value>
+  </data>
+  <data name="ManageGroup" xml:space="preserve">
+    <value>Správa skupiny</value>
+  </data>
+  <data name="GroupName" xml:space="preserve">
+    <value>Název skupiny</value>
+  </data>
+  <data name="GroupDescription" xml:space="preserve">
+    <value>Popis skupiny</value>
+  </data>
+  <data name="DeadlineDate" xml:space="preserve">
+    <value>Datum uzávěrky</value>
+  </data>
+  <data name="WishesPerPersonCount" xml:space="preserve">
+    <value>Počet přání na osobu</value>
+  </data>
+  <data name="SaveChanges" xml:space="preserve">
+    <value>Uložit změny</value>
+  </data>
+  <data name="CloseGroup" xml:space="preserve">
+    <value>Uzavřít skupinu a rozdat přání</value>
+  </data>
+  <data name="GroupInfo" xml:space="preserve">
+    <value>Info o skupině</value>
+  </data>
+  <data name="Deadline" xml:space="preserve">
+    <value>Uzávěrka</value>
+  </data>
+  <data name="WishesPerPerson" xml:space="preserve">
+    <value>Přání na osobu</value>
+  </data>
+  <data name="MyWishes" xml:space="preserve">
+    <value>Moje přání</value>
+  </data>
+  <data name="LoadingWishes" xml:space="preserve">
+    <value>Načítám tvá přání...</value>
+  </data>
+  <data name="NoWishes" xml:space="preserve">
+    <value>Zatím jsi nepřidal žádná přání. Napiš první níže!</value>
+  </data>
+  <data name="RemoveWish" xml:space="preserve">
+    <value>Odstranit přání</value>
+  </data>
+  <data name="WishPlaceholder" xml:space="preserve">
+    <value>Napiš přání...</value>
+  </data>
+  <data name="AddWish" xml:space="preserve">
+    <value>Přidat přání</value>
+  </data>
+  <data name="WishesRemaining" xml:space="preserve">
+    <value>Můžeš přidat ještě {0}</value>
+  </data>
+  <data name="AllWishesDone" xml:space="preserve">
+    <value>Už jsi Santu požádal o všechny své dárky!</value>
+  </data>
+  <data name="AllWishesAlert" xml:space="preserve">
+    <value>🎅 Už jsi Santu požádal o všechny své dárky! ({0}/{1})</value>
+  </data>
+  <data name="CloseGroupFailed" xml:space="preserve">
+    <value>Skupinu nelze uzavřít. Zkontrolujte počet přání účastníků.</value>
+  </data>
+  <data name="SaveSuccess" xml:space="preserve">
+    <value>🎅 Změny byly úspěšně uloženy!</value>
+  </data>
+  <data name="SaveError" xml:space="preserve">
+    <value>❌ Chyba při ukládání: {0}</value>
+  </data>
+  <data name="AddWishError" xml:space="preserve">
+    <value>❌ Chyba při přidávání přání!</value>
+  </data>
+  <data name="RemoveWishError" xml:space="preserve">
+    <value>❌ Chyba při odstraňování přání!</value>
+  </data>
+</root>

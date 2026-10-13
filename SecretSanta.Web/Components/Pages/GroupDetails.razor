@@ -1,0 +1,319 @@
+﻿@page "/{GroupId:guid}"
+@using Microsoft.AspNetCore.Components.Authorization
+@using SecretSanta.ServiceDefaults.Models
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Mvc.RazorPages
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager navigationManager
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IJSRuntime JS
+
+@if (!IsAuthenticated)
+{
+    <div class="empty-state">
+        <span class="empty-icon">🎅</span>
+        <p>@L["LoginToSeeGroup"]</p>
+    </div>
+}
+else if (Group == null)
+{
+    <div class="alert-banner alert-error">
+        <span class="alert-icon">❌</span>
+        <span>@L["GroupNotFound"]</span>
+    </div>
+}
+else if (!Group.IsActive)
+{
+    <section class="page-hero">
+        <span class="eyebrow">🎄 @L["GroupClosed"]</span>
+        <h3>@Group.Name</h3>
+    </section>
+
+    <div class="alert-banner alert-festive">
+        <span class="alert-icon">🎁</span>
+        <span>@L["SantaDecided"]</span>
+    </div>
+    @if (MyAssignments.Count > 0)
+    {
+        <div class="card">
+            <span class="card-ribbon"></span>
+            <h5>🎁 @L["GiftsToBuy"]</h5>
+            <ul class="list-group">
+                @foreach (var assignment in MyAssignments)
+                {
+                    <li class="list-group-item">
+                        <span class="item-bullet">🎁</span>
+                        <span class="wish-text"><span class="wish-owner">@assignment.OwnerName</span> · @assignment.Text</span>
+                    </li>
+                }
+            </ul>
+        </div>
+    }
+}
+else
+{
+    <section class="page-hero">
+        <span class="eyebrow">🎄 @L["GroupDetails"]</span>
+        <h3>@Group.Name</h3>
+        @if (!string.IsNullOrWhiteSpace(Group.Description))
+        {
+            <p class="lead-text">@Group.Description</p>
+        }
+    </section>
+
+    <div class="card">
+        <span class="card-ribbon"></span>
+        @if (IsOwner)
+        {
+            <h4>🎅 @L["ManageGroup"]</h4>
+            <div class="form-grid">
+                <div class="full">
+                    <label class="form-label">@L["GroupName"]</label>
+                    <input class="form-control" @bind="Group.Name" />
+                </div>
+                <div class="full">
+                    <label class="form-label">@L["GroupDescription"]</label>
+                    <textarea class="form-control" @bind="Group.Description"></textarea>
+                </div>
+                <div>
+                    <label class="form-label">@L["DeadlineDate"]</label>
+                    <input type="date" class="form-control" @bind="Group.Deadline" />
+                </div>
+                <div>
+                    <label class="form-label">@L["WishesPerPersonCount"]</label>
+                    <input type="number" class="form-control" @bind="Group.WishesPerPerson" min="1" />
+                </div>
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-success" @onclick="SaveChanges">💾 @L["SaveChanges"]</button>
+                @if (Group.Deadline <= DateTime.UtcNow)
+                {
+                    <button class="btn btn-danger" @onclick="CloseGroup">🎁 @L["CloseGroup"]</button>
+                }
+            </div>
+        }
+        else
+        {
+            <h4>@L["GroupInfo"]</h4>
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">@L["Deadline"]</span>
+                    <span class="info-value">📅 @Group.Deadline.ToString("d")</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">@L["WishesPerPerson"]</span>
+                    <span class="info-value">🎁 @Group.WishesPerPerson</span>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Current user wishes -->
+    <div class="card">
+        <div class="card-header-row">
+            <h5>🎁 @L["MyWishes"]</h5>
+            <span class="badge-date">@UserWishes.Count / @Group.WishesPerPerson</span>
+        </div>
+        <div class="wish-progress">
+            <div class="wish-progress-bar">
+                <span style="width: @(Group.WishesPerPerson > 0 ? Math.Min(100, UserWishes.Count * 100 / Group.WishesPerPerson) : 0)%"></span>
+            </div>
+        </div>
+
+        @if (UserWishes == null)
+        {
+            <div class="loading">@L["LoadingWishes"]</div>
+        }
+        else if (!UserWishes.Any())
+        {
+            <div class="empty-state mb-3">
+                <span class="empty-icon">📝</span>
+                <p>@L["NoWishes"]</p>
+            </div>
+        }
+        else
+        {
+            <ul class="list-group mb-3">
+                @foreach (var wish in UserWishes)
+                {
+                    <li class="list-group-item">
+                        <span class="item-bullet">🎁</span>
+                        <span class="wish-text">@wish.Text</span>
+                        <button class="btn btn-sm btn-icon btn-ghost-danger" title="@L["RemoveWish"]" @onclick="@(() => RemoveWish(wish.Id))">✕</button>
+                    </li>
+                }
+            </ul>
+        }
+
+        @if (UserWishes.Count < Group.WishesPerPerson)
+        {
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="@L["WishPlaceholder"]" @bind="NewWishText" />
+                <button class="btn btn-primary" @onclick="AddWish">＋ @L["AddWish"]</button>
+            </div>
+            <small class="hint">@L["WishesRemaining", Group.WishesPerPerson - UserWishes.Count] 🎄</small>
+        }
+        else
+        {
+            <p class="success-note">🎅 @L["AllWishesDone"]</p>
+        }
+    </div>
+
+}
+
+@code {
+    [Parameter] public Guid GroupId { get; set; }
+
+    private ApiGroup? Group;
+    private bool IsOwner = false;
+    private bool IsAuthenticated = false;
+    private ClaimsPrincipal User;
+    private Guid currentUserId;
+    private List<ApiWish> UserWishes = [];
+    private List<ApiWish> MyAssignments = [];
+    private string NewWishText = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Check auth state
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        User = authState.User;
+        IsAuthenticated = User?.Identity?.IsAuthenticated ?? false;
+        if (!IsAuthenticated)
+        {
+            navigationManager.NavigateTo($"/");
+            return;
+        }
+
+        var client = HttpClientFactory.CreateClient("apiservice");
+
+        // Get group
+        try
+        {
+            Group = await client.GetFromJsonAsync<ApiGroup>($"api/group/{GroupId}");
+        }
+        catch
+        {
+            Group = null;
+            return;
+        }
+
+        if (Group == null) return;
+
+        // Check if current user is the owner
+        var userModel = new ApiUser()
+            {
+                Name = User.Identity.Name,
+                Email = User.FindFirst(ClaimTypes.Email)?.Value,
+                GoogleId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+            };
+
+        var ownerIdResponse = await client.PostAsJsonAsync("api/user", userModel);
+        if (!ownerIdResponse.IsSuccessStatusCode) return;
+        currentUserId = await ownerIdResponse.Content.ReadFromJsonAsync<Guid>();
+        IsOwner = Group.OwnerId == currentUserId;
+        if (!Group.IsActive)
+        {
+            try
+            {
+                MyAssignments = await client.GetFromJsonAsync<List<ApiWish>>($"api/wishes/{GroupId}/{Uri.EscapeDataString(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty)}/assignments") ?? [];
+            }
+            catch
+            {
+                MyAssignments = [];
+            }
+            return;
+        }
+        try
+        {
+            UserWishes = await client.GetFromJsonAsync<List<ApiWish>>($"api/wishes/{GroupId}/{Uri.EscapeDataString(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty)}") ?? [];
+        }
+        catch
+        {
+            UserWishes = [];
+            return;
+        }
+    }
+
+    private async Task CloseGroup()
+    {
+        if (!IsOwner || Group is null) return;
+
+        var googleId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var client = HttpClientFactory.CreateClient("apiservice");
+        var response = await client.PostAsync(
+            $"api/group/{Group.Id}/close?googleId={Uri.EscapeDataString(googleId ?? string.Empty)}", null);
+        if (response.IsSuccessStatusCode)
+        {
+            Group.IsActive = false;
+            MyAssignments = await client.GetFromJsonAsync<List<ApiWish>>($"api/wishes/{GroupId}/{Uri.EscapeDataString(googleId ?? string.Empty)}/assignments") ?? [];
+        }
+        else
+        {
+            await JS.InvokeVoidAsync("alert", L["CloseGroupFailed"].Value);
+        }
+    }
+
+    private async Task SaveChanges()
+    {
+        if (!IsOwner || Group == null) return;
+
+        var client = HttpClientFactory.CreateClient("apiservice");
+        var googleId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var response = await client.PutAsJsonAsync($"api/group/{Group.Id}?googleId={Uri.EscapeDataString(googleId ?? string.Empty)}", Group);
+        if (response.IsSuccessStatusCode)
+        {
+            await JS.InvokeVoidAsync("alert", L["SaveSuccess"].Value);
+        }
+        else
+        {
+            await JS.InvokeVoidAsync("alert", L["SaveError", response.StatusCode].Value);
+        }
+    }
+
+    private async Task AddWish()
+    {
+        if (Group is null || string.IsNullOrWhiteSpace(NewWishText)) return;
+
+        // Check if user reached the maximum number of wishes
+        if (UserWishes.Count >= Group.WishesPerPerson)
+        {
+            await JS.InvokeVoidAsync("alert", L["AllWishesAlert", UserWishes.Count, Group.WishesPerPerson].Value);
+            return;
+        }
+
+        var wish = new ApiWish { Text = NewWishText, GroupId = GroupId, OwnerId = currentUserId, TargetId = null };
+        var googleId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var response = await HttpClientFactory.CreateClient("apiservice").PostAsJsonAsync($"api/wishes?googleId={Uri.EscapeDataString(googleId ?? string.Empty)}", wish);
+        if (response.IsSuccessStatusCode)
+        {
+            var createdWish = await response.Content.ReadFromJsonAsync<ApiWish>();
+            if (createdWish != null)
+            {
+                UserWishes.Add(createdWish);
+                NewWishText = "";
+                StateHasChanged();
+            }
+        }
+        else
+        {
+            await JS.InvokeVoidAsync("alert", L["AddWishError"].Value);
+        }
+    }
+
+    private async Task RemoveWish(Guid wishId)
+    {
+        var client = HttpClientFactory.CreateClient("apiservice");
+        var googleId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var response = await client.DeleteAsync($"api/wishes/{wishId}?googleId={Uri.EscapeDataString(googleId ?? string.Empty)}");
+        if (response.IsSuccessStatusCode)
+        {
+            UserWishes.RemoveAll(w => w.Id == wishId);
+            StateHasChanged();
+        }
+        else
+        {
+            await JS.InvokeVoidAsync("alert", L["RemoveWishError"].Value);
+        }
+    }
+}

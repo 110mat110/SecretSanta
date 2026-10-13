@@ -1,0 +1,56 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@using Microsoft.Extensions.Logging
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject ILogger<ActionButtons> Logger
+
+@* Action Buttons Component for App Bar *@
+
+<div class="action-buttons">
+    <LanguageSwitcher />
+    @if (IsAuthenticated)
+    {
+        <div class="user-info" title="@UserEmail">
+            <span class="user-avatar">@UserInitial</span>
+            <span class="user-name">@UserEmail</span>
+        </div>
+        <a href="/Identity/Logout" target="_top" class="custom-button custom-button-outline">
+            @L["Logout"]
+        </a>
+    }
+    else
+    {
+        <a href="/Identity/Login" target="_top" class="custom-button custom-button-filled">
+            @L["Login"]
+        </a>
+    }
+</div>
+
+
+@code {
+    private ClaimsPrincipal User;
+    private bool IsAuthenticated = false;
+    private string UserEmail = "";
+    private string UserInitial => string.IsNullOrEmpty(UserEmail) ? "?" : UserEmail[..1].ToUpperInvariant();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        try
+        {
+            User = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+            IsAuthenticated = User?.Identity?.IsAuthenticated ?? false;
+
+            if (IsAuthenticated)
+            {
+                // Get the user's email
+                var email = User.FindFirst(ClaimTypes.Email);
+                UserEmail = email != null ? email.Value : User.Identity?.Name ?? "Unknown";
+            }
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e, "Failed to resolve the authenticated user");
+        }
+    }
+}

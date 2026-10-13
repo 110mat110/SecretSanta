@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="PageHome" xml:space="preserve">
+    <value>Home</value>
+  </data>
+  <data name="NotFound" xml:space="preserve">
+    <value>Sorry, there's nothing at this address.</value>
+  </data>
+  <data name="Footer" xml:space="preserve">
+    <value>🎄 Merry Christmas and happy gifting</value>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="Login" xml:space="preserve">
+    <value>Sign in with Google</value>
+  </data>
+  <data name="Logout" xml:space="preserve">
+    <value>Sign out</value>
+  </data>
+  <data name="ChristmasYear" xml:space="preserve">
+    <value>Christmas {0}</value>
+  </data>
+  <data name="YourGroups" xml:space="preserve">
+    <value>Your groups</value>
+  </data>
+  <data name="GroupsIntro" xml:space="preserve">
+    <value>Create a Christmas group, invite your friends with a link and draw gifts based on everyone's wishes.</value>
+  </data>
+  <data name="AddGroup" xml:space="preserve">
+    <value>Add Christmas group</value>
+  </data>
+  <data name="LoadingGroups" xml:space="preserve">
+    <value>Loading groups...</value>
+  </data>
+  <data name="NoGroupsTitle" xml:space="preserve">
+    <value>Nothing here yet</value>
+  </data>
+  <data name="NoGroupsText" xml:space="preserve">
+    <value>You have no active groups. Add one with the button above and invite your friends.</value>
+  </data>
+  <data name="CopyLink" xml:space="preserve">
+    <value>Copy link</value>
+  </data>
+  <data name="Copied" xml:space="preserve">
+    <value>Copied</value>
+  </data>
+  <data name="HeroEyebrow" xml:space="preserve">
+    <value>Christmas gift draw</value>
+  </data>
+  <data name="HeroTitle" xml:space="preserve">
+    <value>&lt;em&gt;Surprise&lt;/em&gt; gifts for the whole crew.</value>
+  </data>
+  <data name="HeroText" xml:space="preserve">
+    <value>Start a group, send your friends a link and let Santa decide who buys what for whom. No slips of paper in a hat.</value>
+  </data>
+  <data name="Step1Title" xml:space="preserve">
+    <value>Create a group</value>
+  </data>
+  <data name="Step1Text" xml:space="preserve">
+    <value>Set the name, deadline and number of wishes per person.</value>
+  </data>
+  <data name="Step2Title" xml:space="preserve">
+    <value>Invite friends</value>
+  </data>
+  <data name="Step2Text" xml:space="preserve">
+    <value>Send them the link and everyone writes down their wishes.</value>
+  </data>
+  <data name="Step3Title" xml:space="preserve">
+    <value>Santa draws</value>
+  </data>
+  <data name="Step3Text" xml:space="preserve">
+    <value>After the deadline everyone sees which gifts to buy.</value>
+  </data>
+  <data name="LoginToSeeGroup" xml:space="preserve">
+    <value>Please sign in to see the group details.</value>
+  </data>
+  <data name="GroupNotFound" xml:space="preserve">
+    <value>Oops! This group is unavailable or doesn't exist.</value>
+  </data>
+  <data name="GroupClosed" xml:space="preserve">
+    <value>Group closed</value>
+  </data>
+  <data name="SantaDecided" xml:space="preserve">
+    <value>Santa has decided who gives gifts to whom!</value>
+  </data>
+  <data name="GiftsToBuy" xml:space="preserve">
+    <value>Gifts you should buy</value>
+  </data>
+  <data name="GroupDetails" xml:space="preserve">
+    <value>Group details</value>
+  </data>
+  <data name="ManageGroup" xml:space="preserve">
+    <value>Manage group</value>
+  </data>
+  <data name="GroupName" xml:space="preserve">
+    <value>Group name</value>
+  </data>
+  <data name="GroupDescription" xml:space="preserve">
+    <value>Group description</value>
+  </data>
+  <data name="DeadlineDate" xml:space="preserve">
+    <value>Deadline</value>
+  </data>
+  <data name="WishesPerPersonCount" xml:space="preserve">
+    <value>Wishes per person</value>
+  </data>
+  <data name="SaveChanges" xml:space="preserve">
+    <value>Save changes</value>
+  </data>
+  <data name="CloseGroup" xml:space="preserve">
+    <value>Close group and assign wishes</value>
+  </data>
+  <data name="GroupInfo" xml:space="preserve">
+    <value>Group info</value>
+  </data>
+  <data name="Deadline" xml:space="preserve">
+    <value>Deadline</value>
+  </data>
+  <data name="WishesPerPerson" xml:space="preserve">
+    <value>Wishes per person</value>
+  </data>
+  <data name="MyWishes" xml:space="preserve">
+    <value>My wishes</value>
+  </data>
+  <data name="LoadingWishes" xml:space="preserve">
+    <value>Loading your wishes...</value>
+  </data>
+  <data name="NoWishes" xml:space="preserve">
+    <value>You haven't added any wishes yet. Write your first one below!</value>
+  </data>
+  <data name="RemoveWish" xml:space="preserve">
+    <value>Remove wish</value>
+  </data>
+  <data name="WishPlaceholder" xml:space="preserve">
+    <value>Write a wish...</value>
+  </data>
+  <data name="AddWish" xml:space="preserve">
+    <value>Add wish</value>
+  </data>
+  <data name="WishesRemaining" xml:space="preserve">
+    <value>You can add {0} more</value>
+  </data>
+  <data name="AllWishesDone" xml:space="preserve">
+    <value>You've asked Santa for all your gifts!</value>
+  </data>
+  <data name="AllWishesAlert" xml:space="preserve">
+    <value>🎅 You've asked Santa for all your gifts! ({0}/{1})</value>
+  </data>
+  <data name="CloseGroupFailed" xml:space="preserve">
+    <value>The group can't be closed. Check the participants' wish counts.</value>
+  </data>
+  <data name="SaveSuccess" xml:space="preserve">
+    <value>🎅 Changes saved successfully!</value>
+  </data>
+  <data name="SaveError" xml:space="preserve">
+    <value>❌ Error while saving: {0}</value>
+  </data>
+  <data name="AddWishError" xml:space="preserve">
+    <value>❌ Error while adding the wish!</value>
+  </data>
+  <data name="RemoveWishError" xml:space="preserve">
+    <value>❌ Error while removing the wish!</value>
+  </data>
+</root>
