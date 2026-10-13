@@ -174,4 +174,19 @@
   <data name="RemoveWishError" xml:space="preserve">
     <value>❌ Chyba pri odstraňovaní želania!</value>
   </data>
+  <data name="InviteTitle" xml:space="preserve">
+    <value>Pozvi kamarátov do skupiny</value>
+  </data>
+  <data name="InviteText" xml:space="preserve">
+    <value>Pošli im tento odkaz, aby sa mohli pridať a napísať svoje želania.</value>
+  </data>
+  <data name="Share" xml:space="preserve">
+    <value>Zdieľať</value>
+  </data>
+  <data name="ShareTitle" xml:space="preserve">
+    <value>Secret Santa: {0}</value>
+  </data>
+  <data name="ShareText" xml:space="preserve">
+    <value>Pridaj sa do našej vianočnej skupiny a napíš svoje želania 🎁</value>
+  </data>
 </root>

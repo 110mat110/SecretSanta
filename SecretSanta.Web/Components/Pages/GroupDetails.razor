@@ -61,6 +61,27 @@ else
         }
     </section>
 
+    <!-- Invite link -->
+    <div class="card invite-card">
+        <div class="invite-header">
+            <span class="invite-icon">💌</span>
+            <div>
+                <h5>@L["InviteTitle"]</h5>
+                <p>@L["InviteText"]</p>
+            </div>
+        </div>
+        <div class="invite-row">
+            <input class="form-control invite-link" readonly value="@GroupLink" aria-label="@L["InviteTitle"]" onclick="this.select()" />
+            <button class="btn @(LinkCopied ? "btn-outline-secondary btn-copied" : "btn-outline-secondary")" @onclick="CopyGroupLink">
+                @(LinkCopied ? $"✓ {L["Copied"]}" : $"📋 {L["CopyLink"]}")
+            </button>
+            @if (CanShare)
+            {
+                <button class="btn btn-primary" @onclick="ShareGroupLink">📤 @L["Share"]</button>
+            }
+        </div>
+    </div>
+
     <div class="card">
         <span class="card-ribbon"></span>
         @if (IsOwner)
@@ -172,6 +193,46 @@ else
     private List<ApiWish> UserWishes = [];
     private List<ApiWish> MyAssignments = [];
     private string NewWishText = "";
+    private bool LinkCopied;
+    private bool CanShare;
+
+    private string GroupLink => navigationManager.ToAbsoluteUri($"/{GroupId}").ToString();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Native share sheet only on touch devices that support it (phones, tablets)
+            CanShare = await JS.InvokeAsync<bool>("secretSanta.canShare");
+            if (CanShare)
+            {
+                StateHasChanged();
+            }
+        }
+    }
+
+    private async Task CopyGroupLink()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("navigator.clipboard.writeText", GroupLink);
+        }
+        catch (JSException)
+        {
+            // Clipboard API unavailable (e.g. non-HTTPS) – the link is still visible and selectable
+            return;
+        }
+
+        LinkCopied = true;
+        StateHasChanged();
+        await Task.Delay(2000);
+        LinkCopied = false;
+    }
+
+    private async Task ShareGroupLink()
+    {
+        await JS.InvokeAsync<bool>("secretSanta.share", L["ShareTitle", Group?.Name ?? ""].Value, L["ShareText"].Value, GroupLink);
+    }
 
     protected override async Task OnInitializedAsync()
     {
