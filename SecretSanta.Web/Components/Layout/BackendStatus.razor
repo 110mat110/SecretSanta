@@ -3,9 +3,12 @@
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager Navigation
 @inject ILogger<BackendStatus> Logger
+@inject IJSRuntime JS
+@inject IConfiguration Configuration
 
 @* Backend connection indicator – pings the API on page load and navigation, click to re-check.
-   After a failure it retries every 10 s, which also keeps waking up a sleeping API (Render free tier). *@
+   After a failure it wakes the API from the browser and retries every 10 s; once the API is back,
+   the page reloads so components that failed to load their data try again. *@
 
 <button type="button" class="backend-status @CssClass" title="@Tooltip" aria-live="polite" @onclick="PingAsync">
     <span class="status-dot"></span>
@@ -19,6 +22,7 @@
     private long? latencyMs;
     private string? failureReason;
     private bool pinging;
+    private bool hadFailure;
     private readonly CancellationTokenSource disposed = new();
     private static readonly TimeSpan RetryDelay = TimeSpan.FromSeconds(10);
 
@@ -46,6 +50,33 @@
         _ when latencyMs is not null => $"{Label} · {L["StatusLatency", latencyMs]}",
         _ => Label
     };
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await WakeApiFromBrowserAsync();
+        }
+    }
+
+    // Render (free tier) answers 429 when one Render service tries to wake another – the browser can wake it
+    private async Task WakeApiFromBrowserAsync()
+    {
+        var baseUrl = Configuration["ApiService:BaseUrl"];
+        if (string.IsNullOrEmpty(baseUrl))
+        {
+            return;
+        }
+
+        try
+        {
+            await JS.InvokeVoidAsync("secretSanta.wakeApi", new Uri(new Uri(baseUrl), "api/ping").ToString());
+        }
+        catch (Exception e) when (e is JSException or JSDisconnectedException or TaskCanceledException)
+        {
+            // best effort
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -107,7 +138,13 @@
 
         if (status != State.Online)
         {
+            hadFailure = true;
             ScheduleRetry();
+        }
+        else if (hadFailure)
+        {
+            // Backend came back after a failed start – reload so the page's data (groups, wishes) loads
+            Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
         }
     }
 
@@ -115,6 +152,7 @@
     {
         try
         {
+            await InvokeAsync(WakeApiFromBrowserAsync);
             await Task.Delay(RetryDelay, disposed.Token);
             await InvokeAsync(PingAsync);
         }
