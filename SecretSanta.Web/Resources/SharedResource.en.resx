@@ -189,4 +189,25 @@
   <data name="ShareText" xml:space="preserve">
     <value>Join our Christmas group and write your wishes 🎁</value>
   </data>
+  <data name="LoadGroupsFailed" xml:space="preserve">
+    <value>Couldn't load your groups. Please try refreshing the page.</value>
+  </data>
+  <data name="WakingUpHint" xml:space="preserve">
+    <value>If the server was asleep, waking it up can take about a minute.</value>
+  </data>
+  <data name="StatusChecking" xml:space="preserve">
+    <value>Connecting…</value>
+  </data>
+  <data name="StatusOnline" xml:space="preserve">
+    <value>Connected</value>
+  </data>
+  <data name="StatusDbDown" xml:space="preserve">
+    <value>Database unavailable</value>
+  </data>
+  <data name="StatusOffline" xml:space="preserve">
+    <value>Server unavailable</value>
+  </data>
+  <data name="StatusLatency" xml:space="preserve">
+    <value>response in {0} ms</value>
+  </data>
 </root>

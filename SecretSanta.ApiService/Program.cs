@@ -55,4 +55,21 @@ if (app.Environment.IsDevelopment())
 app.MapDefaultEndpoints();
 app.MapControllers();
 
+// Connectivity check for the web frontend's status indicator (behind the API key like the rest of /api)
+app.MapGet("/api/ping", async (Context db, CancellationToken cancellationToken) =>
+{
+    bool databaseOk;
+    try
+    {
+        databaseOk = await db.Database.CanConnectAsync(cancellationToken);
+    }
+    catch (Exception e) when (e is not OperationCanceledException)
+    {
+        app.Logger.LogWarning(e, "Ping: database check failed");
+        databaseOk = false;
+    }
+
+    return Results.Ok(new { Status = "ok", Database = databaseOk });
+});
+
 app.Run();

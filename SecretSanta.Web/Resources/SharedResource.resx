@@ -189,4 +189,25 @@
   <data name="ShareText" xml:space="preserve">
     <value>Pridaj sa do našej vianočnej skupiny a napíš svoje želania 🎁</value>
   </data>
+  <data name="LoadGroupsFailed" xml:space="preserve">
+    <value>Skupiny sa nepodarilo načítať. Skús prosím obnoviť stránku.</value>
+  </data>
+  <data name="WakingUpHint" xml:space="preserve">
+    <value>Ak server spal, prebudenie môže trvať asi minútu.</value>
+  </data>
+  <data name="StatusChecking" xml:space="preserve">
+    <value>Pripájam server…</value>
+  </data>
+  <data name="StatusOnline" xml:space="preserve">
+    <value>Pripojené</value>
+  </data>
+  <data name="StatusDbDown" xml:space="preserve">
+    <value>Databáza nedostupná</value>
+  </data>
+  <data name="StatusOffline" xml:space="preserve">
+    <value>Server nedostupný</value>
+  </data>
+  <data name="StatusLatency" xml:space="preserve">
+    <value>odpoveď za {0} ms</value>
+  </data>
 </root>

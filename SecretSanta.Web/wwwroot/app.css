@@ -137,6 +137,61 @@ h1:focus, h1:focus-visible {
     gap: .6rem;
 }
 
+/* Backend connection indicator */
+.backend-status {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .35rem .75rem;
+    font: inherit;
+    font-size: .75rem;
+    font-weight: 600;
+    color: var(--on-dark-soft);
+    background: rgba(255, 255, 255, .07);
+    border: 1px solid rgba(255, 255, 255, .12);
+    border-radius: 999px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color .2s ease, color .2s ease;
+}
+
+    .backend-status:hover {
+        color: var(--on-dark);
+        background: rgba(255, 255, 255, .12);
+    }
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex: none;
+    background: var(--gold);
+}
+
+.backend-status.is-checking .status-dot {
+    animation: status-pulse 1.2s ease-in-out infinite;
+}
+
+.backend-status.is-online .status-dot {
+    background: #4ade80;
+    box-shadow: 0 0 0 3px rgba(74, 222, 128, .2), 0 0 10px rgba(74, 222, 128, .6);
+}
+
+.backend-status.is-warning .status-dot {
+    background: #f59e0b;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, .2);
+}
+
+.backend-status.is-offline .status-dot {
+    background: #f87171;
+    box-shadow: 0 0 0 3px rgba(248, 113, 113, .2);
+}
+
+@keyframes status-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: .35; transform: scale(.75); }
+}
+
 .lang-switcher {
     display: inline-flex;
     padding: 3px;
@@ -1144,8 +1199,13 @@ textarea.form-control {
     }
 
     .brand-name,
-    .user-info {
+    .user-info,
+    .status-label {
         display: none;
+    }
+
+    .backend-status {
+        padding: .55rem;
     }
 
     .app-logo {

@@ -25,9 +25,18 @@
         </div>
     </section>
 
-    @if (Groups == null)
+    @if (LoadFailed)
     {
-        <div class="loading">@L["LoadingGroups"]</div>
+        <div class="alert-banner alert-error">
+            <span class="alert-icon">⚠️</span>
+            <span>@L["LoadGroupsFailed"]</span>
+        </div>
+    }
+    else if (Groups == null)
+    {
+        <div class="loading">
+            <span>@L["LoadingGroups"]<small class="hint">@L["WakingUpHint"]</small></span>
+        </div>
     }
     else if (!Groups.Any())
     {
@@ -109,6 +118,7 @@ else
     private ClaimsPrincipal User;
     private List<ApiGroup> Groups;
     private bool IsAuthenticated = false;
+    private bool LoadFailed;
     private Guid? CopiedGroupId;
     [Inject] private IJSRuntime JS { get; set; }
 
@@ -141,11 +151,17 @@ else
                             PropertyNameCaseInsensitive = true
                         }) ?? [];
                 }
+                else
+                {
+                    Logger.LogError("Loading groups failed: {StatusCode}", response.StatusCode);
+                    LoadFailed = true;
+                }
             }
         }
         catch (Exception e)
         {
-            Logger.LogError(e, "Failed to resolve the authenticated user");
+            Logger.LogError(e, "Failed to load the user's groups");
+            LoadFailed = IsAuthenticated;
         }
     }
 

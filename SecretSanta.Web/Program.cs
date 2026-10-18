@@ -61,8 +61,9 @@ builder.Services.AddHttpClient("apiservice", client =>
 });
 
 // The API may be asleep on free hosting (Render spins it down after inactivity, wake-up takes ~1 min),
-// so allow longer timeouts than the 30 s standard resilience default
-builder.Services.Configure<HttpStandardResilienceOptions>("apiservice-standard", options =>
+// so allow longer timeouts than the 30 s standard resilience default.
+// ConfigureAll: ServiceDefaults registers the handler via ConfigureHttpClientDefaults, whose options name isn't the client name.
+builder.Services.ConfigureAll<HttpStandardResilienceOptions>(options =>
 {
     options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(60);
     options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(120);

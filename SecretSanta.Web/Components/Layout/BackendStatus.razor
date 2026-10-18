@@ -1,0 +1,89 @@
+@using System.Diagnostics
+@implements IDisposable
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+@inject ILogger<BackendStatus> Logger
+
+@* Backend connection indicator – pings the API on page load and navigation, click to re-check *@
+
+<button type="button" class="backend-status @CssClass" title="@Tooltip" aria-live="polite" @onclick="PingAsync">
+    <span class="status-dot"></span>
+    <span class="status-label">@Label</span>
+</button>
+
+@code {
+    private enum State { Checking, Online, DatabaseDown, Offline }
+
+    private State status = State.Checking;
+    private long? latencyMs;
+    private bool pinging;
+
+    private record PingResponse(string Status, bool Database);
+
+    private string CssClass => status switch
+    {
+        State.Online => "is-online",
+        State.DatabaseDown => "is-warning",
+        State.Offline => "is-offline",
+        _ => "is-checking"
+    };
+
+    private string Label => status switch
+    {
+        State.Online => L["StatusOnline"],
+        State.DatabaseDown => L["StatusDbDown"],
+        State.Offline => L["StatusOffline"],
+        _ => L["StatusChecking"]
+    };
+
+    private string Tooltip => latencyMs is null ? Label : $"{Label} · {L["StatusLatency", latencyMs]}";
+
+    protected override async Task OnInitializedAsync()
+    {
+        Navigation.LocationChanged += OnLocationChanged;
+        await PingAsync();
+    }
+
+    private void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+        => _ = InvokeAsync(PingAsync);
+
+    private async Task PingAsync()
+    {
+        if (pinging)
+        {
+            return;
+        }
+
+        pinging = true;
+        // Keep showing "online" during a re-check; only the first check / a failed state shows "checking"
+        if (status != State.Online)
+        {
+            status = State.Checking;
+            latencyMs = null;
+            StateHasChanged();
+        }
+
+        var stopwatch = Stopwatch.StartNew();
+        try
+        {
+            var client = HttpClientFactory.CreateClient("apiservice");
+            var response = await client.GetFromJsonAsync<PingResponse>("api/ping");
+            latencyMs = stopwatch.ElapsedMilliseconds;
+            status = response?.Database == true ? State.Online : State.DatabaseDown;
+        }
+        catch (Exception e)
+        {
+            Logger.LogWarning(e, "Backend ping failed");
+            latencyMs = null;
+            status = State.Offline;
+        }
+        finally
+        {
+            pinging = false;
+        }
+
+        StateHasChanged();
+    }
+
+    public void Dispose() => Navigation.LocationChanged -= OnLocationChanged;
+}
