@@ -1,10 +1,11 @@
-@using System.Diagnostics
+﻿@using System.Diagnostics
 @implements IDisposable
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager Navigation
 @inject ILogger<BackendStatus> Logger
 
-@* Backend connection indicator – pings the API on page load and navigation, click to re-check *@
+@* Backend connection indicator – pings the API on page load and navigation, click to re-check.
+   After a failure it retries every 10 s, which also keeps waking up a sleeping API (Render free tier). *@
 
 <button type="button" class="backend-status @CssClass" title="@Tooltip" aria-live="polite" @onclick="PingAsync">
     <span class="status-dot"></span>
@@ -16,7 +17,10 @@
 
     private State status = State.Checking;
     private long? latencyMs;
+    private string? failureReason;
     private bool pinging;
+    private readonly CancellationTokenSource disposed = new();
+    private static readonly TimeSpan RetryDelay = TimeSpan.FromSeconds(10);
 
     private record PingResponse(string Status, bool Database);
 
@@ -36,7 +40,12 @@
         _ => L["StatusChecking"]
     };
 
-    private string Tooltip => latencyMs is null ? Label : $"{Label} · {L["StatusLatency", latencyMs]}";
+    private string Tooltip => status switch
+    {
+        State.Offline when failureReason is not null => $"{Label} · {failureReason}",
+        _ when latencyMs is not null => $"{Label} · {L["StatusLatency", latencyMs]}",
+        _ => Label
+    };
 
     protected override async Task OnInitializedAsync()
     {
@@ -67,13 +76,25 @@
         try
         {
             var client = HttpClientFactory.CreateClient("apiservice");
-            var response = await client.GetFromJsonAsync<PingResponse>("api/ping");
+            var response = await client.GetFromJsonAsync<PingResponse>("api/ping", disposed.Token);
             latencyMs = stopwatch.ElapsedMilliseconds;
+            failureReason = null;
             status = response?.Database == true ? State.Online : State.DatabaseDown;
+        }
+        catch (OperationCanceledException) when (disposed.IsCancellationRequested)
+        {
+            return; // page closed
         }
         catch (Exception e)
         {
-            Logger.LogWarning(e, "Backend ping failed");
+            failureReason = e switch
+            {
+                HttpRequestException { StatusCode: not null } http => $"HTTP {(int)http.StatusCode.Value}",
+                Polly.Timeout.TimeoutRejectedException => "timeout",
+                Polly.CircuitBreaker.BrokenCircuitException => "circuit open",
+                _ => e.GetBaseException().Message
+            };
+            Logger.LogWarning(e, "Backend ping failed after {ElapsedMs} ms: {Reason}", stopwatch.ElapsedMilliseconds, failureReason);
             latencyMs = null;
             status = State.Offline;
         }
@@ -83,7 +104,30 @@
         }
 
         StateHasChanged();
+
+        if (status != State.Online)
+        {
+            ScheduleRetry();
+        }
     }
 
-    public void Dispose() => Navigation.LocationChanged -= OnLocationChanged;
+    private void ScheduleRetry() => _ = Task.Run(async () =>
+    {
+        try
+        {
+            await Task.Delay(RetryDelay, disposed.Token);
+            await InvokeAsync(PingAsync);
+        }
+        catch (OperationCanceledException)
+        {
+            // page closed
+        }
+    });
+
+    public void Dispose()
+    {
+        Navigation.LocationChanged -= OnLocationChanged;
+        // Cancel only (no Dispose) – a retry still in flight may read the token afterwards
+        disposed.Cancel();
+    }
 }
