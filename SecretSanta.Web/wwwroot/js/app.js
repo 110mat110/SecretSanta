@@ -11,6 +11,25 @@ window.secretSanta = {
         fetch(url, { mode: 'no-cors', cache: 'no-store', credentials: 'omit' }).catch(() => { });
     },
 
+    // Groups the user opened (e.g. from an invite link), kept in a cookie in this browser only
+    getVisitedGroups: () => {
+        const match = document.cookie.match(/(?:^|;\s*)ss_groups=([^;]*)/);
+        if (!match) return [];
+        return decodeURIComponent(match[1]).split(',').filter(id => /^[0-9a-f-]{36}$/i.test(id));
+    },
+
+    addVisitedGroup: (groupId) => window.secretSanta.saveVisitedGroups([groupId, ...window.secretSanta.getVisitedGroups()]),
+
+    removeVisitedGroup: (groupId) => window.secretSanta.saveVisitedGroups(window.secretSanta.getVisitedGroups()
+        .filter(id => id.toLowerCase() !== groupId.toLowerCase())),
+
+    saveVisitedGroups: (groupIds) => {
+        const ids = [...new Map(groupIds.map(id => [id.toLowerCase(), id])).values()];
+        // ~50 GUIDs fit well under the 4 KB cookie limit
+        const value = encodeURIComponent(ids.slice(0, 50).join(','));
+        document.cookie = `ss_groups=${value}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax; Secure`;
+    },
+
     // Returns false when the user cancels the share sheet or sharing fails
     share: async (title, text, url) => {
         try {

@@ -3,6 +3,8 @@
 @using Microsoft.Extensions.Logging
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject ILogger<ActionButtons> Logger
+@inject NavigationManager Navigation
+@implements IDisposable
 
 @* Action Buttons Component for App Bar *@
 
@@ -21,7 +23,7 @@
     }
     else
     {
-        <a href="/Identity/Login" target="_top" class="custom-button custom-button-filled">
+        <a href="@LoginHref" target="_top" class="custom-button custom-button-filled">
             @L["Login"]
         </a>
     }
@@ -34,8 +36,18 @@
     private string UserEmail = "";
     private string UserInitial => string.IsNullOrEmpty(UserEmail) ? "?" : UserEmail[..1].ToUpperInvariant();
 
+    // Return to the current page (e.g. a group invite link) after Google sign-in
+    private string LoginHref =>
+        $"/Identity/Login?returnUrl={Uri.EscapeDataString("/" + Navigation.ToBaseRelativePath(Navigation.Uri))}";
+
+    private void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+        => InvokeAsync(StateHasChanged);
+
+    public void Dispose() => Navigation.LocationChanged -= OnLocationChanged;
+
     protected override async Task OnInitializedAsync()
     {
+        Navigation.LocationChanged += OnLocationChanged;
         await base.OnInitializedAsync();
         try
         {

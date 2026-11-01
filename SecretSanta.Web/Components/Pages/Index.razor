@@ -165,6 +165,54 @@ else
         }
     }
 
+    private bool VisitedGroupsLoaded;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // Add groups the user opened from a link (stored in a cookie by the group page).
+        // JS is only available after render, and the own groups may still be loading.
+        if (VisitedGroupsLoaded || !IsAuthenticated || Groups == null) return;
+        VisitedGroupsLoaded = true;
+
+        List<string> visitedIds;
+        try
+        {
+            visitedIds = await JS.InvokeAsync<List<string>>("secretSanta.getVisitedGroups");
+        }
+        catch (JSException e)
+        {
+            Logger.LogWarning(e, "Reading visited groups failed");
+            return;
+        }
+
+        var client = HttpClientFactory.CreateClient("apiservice");
+        var missingIds = visitedIds
+            .Select(id => Guid.TryParse(id, out var guid) ? guid : Guid.Empty)
+            .Where(id => id != Guid.Empty && Groups.All(g => g.Id != id))
+            .Distinct();
+
+        var visitedGroups = await Task.WhenAll(missingIds.Select(async id =>
+        {
+            try
+            {
+                return await client.GetFromJsonAsync<ApiGroup>($"api/group/{id}");
+            }
+            catch (Exception e)
+            {
+                // Deleted group or API hiccup – just skip it
+                Logger.LogInformation(e, "Visited group {GroupId} could not be loaded", id);
+                return null;
+            }
+        }));
+
+        var added = visitedGroups.OfType<ApiGroup>().Where(g => Groups.All(x => x.Id != g.Id)).ToList();
+        if (added.Count > 0)
+        {
+            Groups.AddRange(added);
+            StateHasChanged();
+        }
+    }
+
     private void NavigateToGroup(Guid groupId)
     {
         navigationManager.NavigateTo($"/{groupId}");

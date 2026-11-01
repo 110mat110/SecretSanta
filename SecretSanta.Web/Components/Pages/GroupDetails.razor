@@ -13,6 +13,9 @@
     <div class="empty-state">
         <span class="empty-icon">🎅</span>
         <p>@L["LoginToSeeGroup"]</p>
+        <a href="/Identity/Login?returnUrl=@Uri.EscapeDataString($"/{GroupId}")" target="_top" class="custom-button custom-button-gold">
+            @L["Login"]
+        </a>
     </div>
 }
 else if (Group == null)
@@ -47,6 +50,13 @@ else if (!Group.IsActive)
                     </li>
                 }
             </ul>
+        </div>
+    }
+
+    @if (IsOwner)
+    {
+        <div class="form-actions">
+            <button class="btn btn-outline-danger" @onclick="DeleteGroup">🗑️ @L["DeleteGroup"]</button>
         </div>
     }
 }
@@ -111,6 +121,7 @@ else
                 {
                     <button class="btn btn-danger" @onclick="CloseGroup">🎁 @L["CloseGroup"]</button>
                 }
+                <button class="btn btn-outline-danger" @onclick="DeleteGroup">🗑️ @L["DeleteGroup"]</button>
             </div>
         }
         else
@@ -195,6 +206,7 @@ else
     private string NewWishText = "";
     private bool LinkCopied;
     private bool CanShare;
+    private bool VisitRecorded;
 
     private string GroupLink => navigationManager.ToAbsoluteUri($"/{GroupId}").ToString();
 
@@ -208,6 +220,13 @@ else
             {
                 StateHasChanged();
             }
+        }
+
+        // Remember the group in a cookie so it appears on the user's home page (the group loads asynchronously)
+        if (!VisitRecorded && IsAuthenticated && Group is not null)
+        {
+            VisitRecorded = true;
+            await JS.InvokeVoidAsync("secretSanta.addVisitedGroup", GroupId.ToString());
         }
     }
 
@@ -242,7 +261,7 @@ else
         IsAuthenticated = User?.Identity?.IsAuthenticated ?? false;
         if (!IsAuthenticated)
         {
-            navigationManager.NavigateTo($"/");
+            // Show the login button, which returns here after Google sign-in
             return;
         }
 
@@ -312,6 +331,25 @@ else
         else
         {
             await JS.InvokeVoidAsync("alert", L["CloseGroupFailed"].Value);
+        }
+    }
+
+    private async Task DeleteGroup()
+    {
+        if (!IsOwner || Group is null) return;
+        if (!await JS.InvokeAsync<bool>("confirm", L["DeleteGroupConfirm", Group.Name].Value)) return;
+
+        var googleId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var client = HttpClientFactory.CreateClient("apiservice");
+        var response = await client.DeleteAsync($"api/group/{Group.Id}?googleId={Uri.EscapeDataString(googleId ?? string.Empty)}");
+        if (response.IsSuccessStatusCode)
+        {
+            await JS.InvokeVoidAsync("secretSanta.removeVisitedGroup", Group.Id.ToString());
+            navigationManager.NavigateTo("/");
+        }
+        else
+        {
+            await JS.InvokeVoidAsync("alert", L["DeleteGroupFailed"].Value);
         }
     }
 

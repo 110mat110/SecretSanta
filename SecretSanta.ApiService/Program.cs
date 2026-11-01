@@ -14,6 +14,13 @@ builder.Services.AddTransient<UserService>();
 builder.Services.AddTransient<GroupService>();
 builder.Services.AddTransient<WishService>();
 
+// Emails via Brevo HTTP API. No automatic retries: a retried POST could deliver the same email twice.
+builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection("Email"));
+#pragma warning disable EXTEXP0001 // RemoveAllResilienceHandlers is marked experimental
+builder.Services.AddHttpClient<EmailService>(client => client.Timeout = TimeSpan.FromSeconds(20))
+    .RemoveAllResilienceHandlers();
+#pragma warning restore EXTEXP0001
+
 builder.Services.AddDbContext<Context>(options =>
     options.UseNpgsql(
         builder.Configuration.GetConnectionString("DefaultConnection")

@@ -210,4 +210,13 @@
   <data name="StatusLatency" xml:space="preserve">
     <value>odpoveď za {0} ms</value>
   </data>
+  <data name="DeleteGroup" xml:space="preserve">
+    <value>Zmazať skupinu</value>
+  </data>
+  <data name="DeleteGroupConfirm" xml:space="preserve">
+    <value>Naozaj chceš zmazať skupinu „{0}“? Zmažú sa aj všetky želania a nedá sa to vrátiť.</value>
+  </data>
+  <data name="DeleteGroupFailed" xml:space="preserve">
+    <value>Skupinu sa nepodarilo zmazať.</value>
+  </data>
 </root>

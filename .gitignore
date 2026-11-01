@@ -61,3 +61,4 @@ nunit-*.xml
 /SecretSanta.Web/appsettings.Development.json
 /SecretSanta.Web/SecretSanta.Web.csproj.user
 /SecretSanta.ApiService/SecretSanta.ApiService.csproj.user
+tools/close-due-groups.env

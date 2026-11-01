@@ -34,6 +34,19 @@ public class GroupController(GroupService groupService) : ControllerBase
 
     }
 
+    /// <summary>Closes all groups past their deadline. Called by the cron job (needs X-Internal-Api-Key outside Development).</summary>
+    [HttpPost("close-due")]
+    public async Task<CloseDueResult> CloseDueGroups()
+    {
+        return await groupService.CloseDueGroupsAsync();
+    }
+
+    [HttpDelete("{groupId}")]
+    public async Task<IActionResult> DeleteGroup(Guid groupId, [FromQuery] string googleId)
+    {
+        return await groupService.DeleteGroupAsync(groupId, googleId) ? NoContent() : NotFound();
+    }
+
     [HttpPost("{groupId}/close")]
     public async Task<IActionResult> CloseGroup(Guid groupId, [FromQuery] string googleId)
     {

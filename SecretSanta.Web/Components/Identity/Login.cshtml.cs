@@ -35,6 +35,7 @@ public class Login : PageModel
                 ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8)
             });
 
-        return LocalRedirect("/");
+        // Back to the page the user came from (e.g. a group invite link)
+        return LocalRedirect(Url.IsLocalUrl(returnUrl) ? returnUrl! : "/");
     }
 }

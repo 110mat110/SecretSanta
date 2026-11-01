@@ -210,4 +210,13 @@
   <data name="StatusLatency" xml:space="preserve">
     <value>response in {0} ms</value>
   </data>
+  <data name="DeleteGroup" xml:space="preserve">
+    <value>Delete group</value>
+  </data>
+  <data name="DeleteGroupConfirm" xml:space="preserve">
+    <value>Do you really want to delete the group “{0}”? All wishes will be deleted too and this can't be undone.</value>
+  </data>
+  <data name="DeleteGroupFailed" xml:space="preserve">
+    <value>The group couldn't be deleted.</value>
+  </data>
 </root>
